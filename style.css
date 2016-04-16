@@ -1,0 +1,36 @@
+html, body {
+	width: 100%; 
+	height: 100%; 
+	background-color: #fff;
+}
+
+#map {
+	width: 100%;
+	height: 100%
+}
+
+#commentsWindow {
+	width: 200px;
+	position: absolute;
+	left: 50px;
+	top: 50px;
+	border: 1ps solid black;
+	background: #ffffff;
+}
+
+.show {
+	z-index: 3000;
+}
+
+#comments {
+	height: 60px;
+	background-color: #ffffff;
+	
+}
+
+.addCommentBlock > input,
+.addCommentBlock > label,
+.addCommentBlock > button
+{
+	display: block;
+}
