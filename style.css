@@ -10,12 +10,12 @@ html, body {
 }
 
 #commentsWindow {
-	width: 200px;
+	width: 250px;
+	height: 350px;
 	position: absolute;
-	left: 50px;
-	top: 50px;
 	border: 1ps solid black;
 	background: #ffffff;
+
 }
 
 .show {
@@ -25,7 +25,8 @@ html, body {
 #comments {
 	height: 60px;
 	background-color: #ffffff;
-	
+	overflow: auto; 
+	list-style-type: none;
 }
 
 .addCommentBlock > input,
