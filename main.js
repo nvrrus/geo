@@ -11,24 +11,29 @@ function onCloseWindow() {
 }
 
 function onAddComment() {
-	 var clickObject =  {
-            	"op": "add",
-            	"review": {
-            		"coords": clickCoords, 
-            		"address": clickAddress,
-            		"name": nameInp.value,
-            		"place": companyInp.value,
-            		"text": commentInp.value,
-            		"date": ''
-            	}
-            };
+	var d = new Date(),
+	clickObject =  {
+		"op": "add",
+		"review": {
+			"coords": clickCoords, 
+			"address": clickAddress,
+			"name": nameInp.value,
+			"place": companyInp.value,
+			"text": commentInp.value,
+			"date": d.toLocaleString()
+		}
+	};
 	var req = new XMLHttpRequest();
 	req.responseType = 'json';
 	req.open('POST', 'http://localhost:3000', true);
 	req.onload = function() {
+		var noCommentsEl = document.getElementById("noComments");
+		if(noCommentsEl !== null)
+			noCommentsEl.parentNode.removeChild(noCommentsEl);
+
 		console.log(req.response);
 		clusterer.add(getPlaceMark(clickObject.review));
-	    comments.innerHTML += '<li><p><b>'+ nameInp.value +'</b> '+ commentInp.value +'</p></li>';
+	    comments.innerHTML += getLiHtmlByObject(clickObject.review);//'<li><p><b>'+ nameInp.value +'</b> '+ commentInp.value +'</p></li>';
 	};
 	req.onerror = function(argument) {
 		alert('Не удалось отправить данные на сервер');
@@ -188,6 +193,7 @@ function openCommentsWindow(left, top, coords, address)
 {
 	myMap.balloon.close();
 	title.innerHTML = address;
+	title.setAttribute('title', address);
 	commentsWindow.style.top = calcY(top) + 'px';
 	commentsWindow.style.left = calcX(left) + 'px'; 
 	comments.innerHTML = '';
@@ -210,15 +216,27 @@ function openCommentsWindow(left, top, coords, address)
 		}
 		req.send(JSON.stringify(body));
 	}).then(function(response){
-		if(response === null)
+		if(response === null) {
 			return;
+		}
+		if(response.length == 0){
+			comments.innerHTML += '<li id="noComments">Пока нет отзывов<li>';
+			return;
+		}
+		comments.innerHTML = '';
 		for (var key in response) {
-			comments.innerHTML += '<li><p><b>'+ response[key].name +'</b> '+ response[key].text +'</p></li>';
+			comments.innerHTML += getLiHtmlByObject(response[key]);
 		}
     }, 
     function(address){
     	alert('Ошибка при получении отзывов по адресу: ' + address);
     });
+}
+
+function getLiHtmlByObject(obj)
+{
+	return '<li><p><b>'+ obj.name +'</b>   '+ obj.place + '</p>'+
+								  '<p>' + obj.text  +  '</p></li>'
 }
 
 function calcX(left)

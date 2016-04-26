@@ -15,7 +15,7 @@ html, body {
 
 #commentsWindow {
 	width: 380px;
-	height: 530px;
+	height: 525px;
 	position: absolute;
 	background: #ffffff;
 	border-radius: 10px 10px 10px 10px;
@@ -29,11 +29,16 @@ html, body {
 	padding: 0px;
 	margin-left: 7px;
 	margin-right: 7px;
-	height: 160px;
+	height: 140px;
 	background-color: #ffffff;
 	overflow: auto; 
 	list-style-type: none;
 	border-bottom: 1px solid gray;
+}
+
+.addCommentBlock label {
+	color: #ff8663;
+	margin-left: 15px 
 }
 
 .top {
@@ -41,11 +46,20 @@ html, body {
 	background-color: #ff8663; 
 	border-radius: 10px 10px 0px 0px;
 	color: #111111;	
-	font-size: 9pt;
-	position: relative;;
+	font-size: 12pt;
+	position: relative;
+	
 }
 
+#comments li {
+	padding-left: 20px;
+	padding-top: 10px;
+}
 
+#comments p {
+	padding: 2px;
+	margin: 0px;
+}
 
 .top div {
 	position: absolute;
@@ -55,18 +69,21 @@ html, body {
 	width: 310px;
 	left: 30px;
 	right: 30px;
-	top:5px;
+	top: 15px;
 	color: #ffffff;
+	white-space: nowrap; /* Запрещаем перенос строк */
+    overflow: hidden; /* Обрезаем все, что не помещается в область */
+    text-overflow: ellipsis; /* Добавляем многоточие */
 }
 
 .first {
 	padding-left: 10px;
-	top: 10px;
+	top: 18px;
 	width: 30px;
 }
 
 .third {
-	top: 10px;
+	top: 18px;
 	width:  30px;
 	right: 0;
 }
@@ -76,4 +93,51 @@ html, body {
 .addCommentBlock > button
 {
 	display: block;
+}
+
+.addCommentBlock input,
+.addCommentBlock textarea{
+	border-radius: 18px; 
+	width: 333px;
+	margin:  7px 15px;
+	border: 1px solid gray; 
+	padding-left: 15px;
+}
+
+#nameInp,
+#companyInp {
+	height: 36px;
+	
+}
+
+#commentInp {
+	height: 100px;
+	padding-top: 10px;
+}
+
+#addBtn {
+	position: relative;
+	left: 280px;
+	height: 40px;
+	width: 85px;
+	border-radius: 10px;
+	background-color: #ff8663; 
+	color: #ffffff;
+}
+
+#addBtn:hover {
+	background-color: #ffffff;
+	color: gray; 
+}
+
+#closeBtn:hover{
+	cursor: pointer;
+}
+
+#noComments {
+	padding-left: 10px
+}
+
+.hideNoComments{
+	display: none;
 }
