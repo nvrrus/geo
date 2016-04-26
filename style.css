@@ -2,20 +2,23 @@ html, body {
 	width: 100%; 
 	height: 100%; 
 	background-color: #fff;
+	padding: 0px;
+	margin: 0px;
 }
 
 #map {
 	width: 100%;
-	height: 100%
+	height: 100%;
+	padding: 0px;
+	margin: 0px;
 }
 
 #commentsWindow {
-	width: 250px;
-	height: 350px;
+	width: 380px;
+	height: 530px;
 	position: absolute;
-	border: 1ps solid black;
 	background: #ffffff;
-
+	border-radius: 10px 10px 10px 10px;
 }
 
 .show {
@@ -23,10 +26,49 @@ html, body {
 }
 
 #comments {
-	height: 60px;
+	padding: 0px;
+	margin-left: 7px;
+	margin-right: 7px;
+	height: 160px;
 	background-color: #ffffff;
 	overflow: auto; 
 	list-style-type: none;
+	border-bottom: 1px solid gray;
+}
+
+.top {
+	height: 50px;
+	background-color: #ff8663; 
+	border-radius: 10px 10px 0px 0px;
+	color: #111111;	
+	font-size: 9pt;
+	position: relative;;
+}
+
+
+
+.top div {
+	position: absolute;
+}
+
+.second {
+	width: 310px;
+	left: 30px;
+	right: 30px;
+	top:5px;
+	color: #ffffff;
+}
+
+.first {
+	padding-left: 10px;
+	top: 10px;
+	width: 30px;
+}
+
+.third {
+	top: 10px;
+	width:  30px;
+	right: 0;
 }
 
 .addCommentBlock > input,

@@ -3,8 +3,9 @@ var mapCenter = [55.755381, 37.619044],
 	myMap, 
 	сlickCoords,
 	clickAddress,
-	clusterer;
-
+	clusterer,
+ // Создаем собственный макет с информацией о выбранном геообъекте.
+     customItemContentLayout;
 function onCloseWindow() {
 	commentsWindow.classList.toggle('show');
 }
@@ -39,9 +40,16 @@ function getPlaceMark(valueObj)
 {
 	var placemark = new ymaps.Placemark([valueObj.coords.x,valueObj.coords.y], {
 	            // Устаналиваем данные, которые будут отображаться в балуне.
+	            balloonX: valueObj.coords.x,
+	            balloonY: valueObj.coords.y,
 	            balloonContentHeader: valueObj.place,
 	            balloonContentAddress: valueObj.address,
-	            balloonContentComment: valueObj.text 
+	            balloonContentComment: valueObj.text,
+	            // balloonContentLayout: customItemContentLayout,
+	            // balloonPanelMaxMapArea: 0,
+	            hintContent: valueObj.place + valueObj.address + valueObj.text
+	        }, {
+	        	balloonContentLayout: customItemContentLayout
 	        });
 	return placemark;
 }
@@ -54,7 +62,6 @@ function getPlaceMarksByResponses(response)
 	for (var key in response) {
 		for (var i = 0; i < response[key].length; i++) {
 			placemarks.push(getPlaceMark(response[key][i]));
-			comments.innerHTML += '<li><p><b>'+ response[key][i].name +'</b> '+ response[key][i].text +'</p></li>';
 		}
 	}
 	return placemarks;
@@ -91,17 +98,33 @@ new Promise(function(resolve) {
 	//Убираем окно с кмментариями
 	closeBtn.addEventListener('click', onCloseWindow);
 	addBtn.addEventListener('click', onAddComment);
+	document.addEventListener('click', onClick)
 //	readBtn.addEventListener('click', onReadComments);
 });
 
+function onClick(e) {
+	if(e.target == myMap.balloon)
+	{
+		return;	
+	}
+	if(e.target.parentElement.classList.contains('ballon_body'))
+	{
+		e.preventDefault();
+		clickCoords = { 'x': e.target.getAttribute('d_x'), 'y':  e.target.getAttribute('d_y') };
+		clickAddress = e.target.innerHTML;
+		console.log(clickCoords);
+		openCommentsWindow(e.clientX, e.clientY, clickCoords, clickAddress);
+	}
+}
+
 function init () {
-	 // Создаем собственный макет с информацией о выбранном геообъекте.
-    var customItemContentLayout = ymaps.templateLayoutFactory.createClass(
+	customItemContentLayout =  ymaps.templateLayoutFactory.createClass(
         // Флаг "raw" означает, что данные вставляют "как есть" без экранирования html.
         '<h2 class=ballon_header>{{ properties.balloonContentHeader|raw }}</h2>' +
-        '<div class=ballon_body><a href="#">{{ properties.balloonContentAddress|raw }}</a></div>' +
+        '<div class=ballon_body><a href="#" d_x="{{properties.balloonX|raw}}" d_y="{{properties.balloonY|raw}}">{{ properties.balloonContentAddress|raw }}</a></div>' +
         '<div class=ballon_footer>{{ properties.balloonContentComment|raw }}</div>'
     );
+	
 	clusterer = new ymaps.Clusterer({
         clusterDisableClickZoom: true,
         clusterOpenBalloonOnClick: true,
@@ -114,7 +137,7 @@ function init () {
         clusterBalloonPanelMaxMapArea: 0,
         // Устанавливаем размеры макета контента балуна (в пикселях).
         clusterBalloonContentLayoutWidth: 200,
-        clusterBalloonContentLayoutHeight: 130,
+        clusterBalloonContentLayoutHeight: 160,
         // Устанавливаем максимальное количество элементов в нижней панели на одной странице
         clusterBalloonPagerSize: 5
         // Настройка внешего вида нижней панели.
@@ -126,6 +149,7 @@ function init () {
         // clusterBalloonPagerVisible: false
     });
 
+	//clusterer.addEventListener('click', onClickClaster);
     myMap = new ymaps.Map("map", {
         center: mapCenter, // Углич
         zoom: 11
@@ -145,28 +169,81 @@ function init () {
 	        				   e._sourceEvent.originalEvent.pagePixels[1],
 	        				   clickCoords,
 	        				   clickAddress);
-	    })
+		})
     });
     
+    clusterer.events.add('click', function(e){
+    	if(commentsWindow.classList.contains('show'))
+	    	commentsWindow.classList.toggle('show');
+    })
     onLoadInit();    
+}
+
+function onClickClaster(e)
+{
+	alert('Клстер');
 }
 
 function openCommentsWindow(left, top, coords, address)
 {
+	myMap.balloon.close();
 	title.innerHTML = address;
+	commentsWindow.style.top = calcY(top) + 'px';
+	commentsWindow.style.left = calcX(left) + 'px'; 
+	comments.innerHTML = '';
 	if(!commentsWindow.classList.contains('show'))
 	    commentsWindow.classList.toggle('show');
 
-	commentsWindow.style.top = calcX(top) + 'px';
-	commentsWindow.style.left = calcY(left) + 'px'; 
+	var p = new Promise(function(resolve, reject){
+    	var req = new XMLHttpRequest();
+		req.open('POST', 'http://localhost:3000', true);
+		req.responseType = 'json';
+		req.onload = function(){
+			resolve(req.response);	
+		} 
+		req.onerror = function(){ 
+			reject(address);
+		} 
+		var body = {
+			op: "get", 
+			address: address
+		}
+		req.send(JSON.stringify(body));
+	}).then(function(response){
+		if(response === null)
+			return;
+		for (var key in response) {
+			comments.innerHTML += '<li><p><b>'+ response[key].name +'</b> '+ response[key].text +'</p></li>';
+		}
+    }, 
+    function(address){
+    	alert('Ошибка при получении отзывов по адресу: ' + address);
+    });
 }
 
 function calcX(left)
 {
+	if(left + commentsWindow.offsetWidth > document.body.clientWidth)
+	{ 
+		var delta = document.body.clientWidth - commentsWindow.offsetWidth;
+		if(delta < 0)
+			return 0;
+		else 
+			return delta;
+	}
+	
 	return left;
 }
 
 function calcY(top)
 {
+	if(top + commentsWindow.offsetHeight > document.body.clientHeight)
+	{
+		var delta = document.body.clientHeight - commentsWindow.offsetHeight;
+		if(delta < 0)
+			return 0;
+		else
+			return delta;
+	}
 	return top;
 }
